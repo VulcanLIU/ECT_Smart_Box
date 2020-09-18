@@ -1,0 +1,102 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "D:\\Arduino\\hardware\\arduino\\avr\\cores\\arduino"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "D:\\Arduino\\hardware\\arduino\\avr\\variants\\mega"
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\Code.ino.cpp",
+    "Include": "Keypad.h",
+    "Includepath": "C:\\Users\\Vulca\\Documents\\Arduino\\libraries\\Keypad\\src"
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\Code.ino.cpp",
+    "Include": "LiquidCrystal.h",
+    "Includepath": "D:\\Arduino\\libraries\\LiquidCrystal\\src"
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\Code.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\RtcDateTime.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\RtcUtility.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\croutine.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\event_groups.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\heap_3.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\list.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\port.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\queue.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\stream_buffer.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\tasks.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\timers.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\variantHooks.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Vulca\\Documents\\Arduino\\libraries\\Keypad\\src\\Key.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Vulca\\Documents\\Arduino\\libraries\\Keypad\\src\\Keypad.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "D:\\Arduino\\libraries\\LiquidCrystal\\src\\LiquidCrystal.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]
