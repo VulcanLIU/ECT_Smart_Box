@@ -5,7 +5,8 @@
             "includePath": [
                 "D:\\Arduino\\tools\\**",
                 "D:\\Arduino\\hardware\\arduino\\avr\\**",
-                "D:\\Arduino\\libraries\\**"
+                "D:\\Arduino\\libraries\\**",
+                "D:\\Arduino\\hardware\\arduino\\avr\\libraries\\EEPROM\\**"
 
             ],
             "forcedInclude": [

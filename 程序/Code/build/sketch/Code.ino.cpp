@@ -6,6 +6,7 @@
 #include <LiquidCrystal.h>
 #include "ThreeWire.h"
 #include "RtcDS1302.h"
+#include <EEPROM.h>
 
 #define KEY_COLUMN_NUM 4
 #define KEY_ROW_NUM 4
@@ -22,8 +23,9 @@
 #define BUZZER_P_PIN 22
 #define BUZZER_N_PIN 26
 
-#define PAGE_DATA_NUM 3 //每页数据量
-#define PAGE_NUM 5      //页面总数
+#define PAGE_DATA_NUM 3                        //每页数据量
+#define PAGE_NUM 5                             //页面总数
+#define DATA_TOTAL_NUM PAGE_DATA_NUM *PAGE_NUM //需要保存的数据总量
 
 #define countof(a) (sizeof(a) / sizeof(a[0]))
 
@@ -83,21 +85,21 @@ PAGE Page[PAGE_NUM] = {
         {{0, 1, 12}, {5, 1, 12}, {10, 1, 14}} //
     },
     {
-        {{0, 1, "Alarm1"}, {8, 1, "B"}},      // UI界面文字
-        {{8, 1, 12}, {5, 1, 12}, {10, 1, 14}} //
-    },                                        //Page1;
+        {{0, 1, "Alarm1"}, {8, 1, "B"}},       // UI界面文字
+        {{9, 1, 12}, {12, 1, 12}, {15, 1, 14}} //
+    },                                         //Page1;
     {
-        {{0, 1, "Alarm2"}, {8, 1, "D"}},      // UI界面文字
-        {{8, 1, 12}, {5, 1, 12}, {10, 1, 14}} //
-    },                                        //Page2;
+        {{0, 1, "Alarm2"}, {8, 1, "D"}},       // UI界面文字
+        {{9, 1, 12}, {12, 1, 12}, {15, 1, 14}} //
+    },                                         //Page2;
     {
-        {{0, 1, "Alarm3"}, {8, 1, "B"}},      // UI界面文字
-        {{8, 1, 12}, {5, 1, 12}, {10, 1, 14}} //
-    },                                        //Page3;
+        {{0, 1, "Alarm3"}, {8, 1, "B"}},       // UI界面文字
+        {{9, 1, 12}, {12, 1, 12}, {15, 1, 14}} //
+    },                                         //Page3;
     {
-        {{0, 1, "Alarm4"}, {8, 1, "B"}},      // UI界面文字
-        {{8, 1, 12}, {5, 1, 12}, {10, 1, 14}} //
-    }                                         //Page4;
+        {{0, 1, "Alarm4"}, {8, 1, "B"}},       // UI界面文字
+        {{9, 1, 12}, {12, 1, 12}, {15, 1, 14}} //
+    }                                          //Page4;
 };
 
 typedef struct DISPLAYINDEX
@@ -125,21 +127,30 @@ void TaskMainLogic(void *pvParameters);    //主逻辑任务
 void TaskDisplay(void *pvParameters);      //1602显示器显示任务
 void TaskAlarm(void *pvParameters);        //报警
 
-#line 126 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 128 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void setup();
-#line 183 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 194 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void loop();
-#line 462 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 507 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void BUZZER_init();
-#line 473 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 518 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void BUZZER_SetHigh();
-#line 482 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 527 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void BUZZER_SetLow();
-#line 126 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 128 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void setup()
 {
     //打开串口
     Serial.begin(115200);
+
+    //读取数据
+    for (uint8_t i = 0; i < PAGE_NUM; i++)
+    {
+        for (uint8_t j = 0; j < PAGE_DATA_NUM; j++)
+        {
+            Page[i].UI_data[j].data = EEPROM.read(i * PAGE_DATA_NUM + j);
+        }
+    }
 
     //启动显示器
     lcd.begin(16, 2);
@@ -270,14 +281,14 @@ void TaskMainLogic(void *pvParameters)
             BUZZER_SetLow();
 
             //任务管理
-            //*根据按键内容更改显示内容
 
+            //*根据按键内容更改显示内容
             switch (lReceivedValue[0])
             {
-            case '1':                                                      //功能键
+            case '0':                                                      //功能键
                 if (lDisplayIndex.F_key_num < lDisplayIndex.F_key_MAX_num) //功能按键次数大于最大次数
                 {
-                    //第一页
+                    //如果第一页
                     if (lDisplayIndex.page == 0)
                     {
                         lDisplayIndex.F_key_num = PAGE_DATA_NUM;
@@ -309,6 +320,15 @@ void TaskMainLogic(void *pvParameters)
                     //显示屏page归零.index归零
                     lDisplayIndex.index = 0;
                     lDisplayIndex.page = 0;
+
+                    //保存数据
+                    for (uint8_t i = 0; i < PAGE_NUM; i++)
+                    {
+                        for (uint8_t j = 0; j < PAGE_DATA_NUM; j++)
+                        {
+                            EEPROM.write(i * PAGE_DATA_NUM + j, Page[i].UI_data[j].data);
+                        }
+                    }
                 }
                 Serial.print("page:");
                 Serial.print(lDisplayIndex.page);
@@ -319,21 +339,43 @@ void TaskMainLogic(void *pvParameters)
 
                 break;
 
-            case '2': //调节上键
-                //**如果此时是修改状态
-                if (lDisplayIndex.index_visiable)
+            case '1': //调节上键
+                //如果第一页
+                if (lDisplayIndex.page == 0)
                 {
-                    switch (lDisplayIndex.page)
-                    {
-                    case 1:
-                        /* code */
-                        break;
-
-                    default:
-                        break;
-                    }
                 }
+                else
+                {
+                    int8_t _temp = Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].data;
+                    _temp++;
+                    if (_temp > 12 && lDisplayIndex.index == 0)
+                        _temp -= 12;
+                    if (_temp > 60 && lDisplayIndex.index == 1)
+                        _temp -= 60;
+                    if (_temp > 99 && lDisplayIndex.index == 2)
+                        _temp -= 99;
+                    Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].data = _temp;
+                }
+
                 break;
+            case '2': //调节下键
+                //如果第一页
+                if (lDisplayIndex.page == 0)
+                {
+                }
+                else
+                {
+                    int8_t _temp = Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].data;
+                    _temp--;
+                    if (_temp <= 0 && lDisplayIndex.index == 0)
+                        _temp += 12;
+                    if (_temp <= 0 && lDisplayIndex.index == 1)
+                        _temp += 60;
+                    if (_temp <= 0 && lDisplayIndex.index == 2)
+                        _temp += 99;
+                    Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].data = _temp;
+                }
+
             default:
                 break;
             }
@@ -432,8 +474,6 @@ void TaskDisplay(void *pvParameters)
         if (lDisplayIndex.page > 0)
         {
             //*lcd显示定时数据内容
-            // lcd.setCursor(Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].X,  //X位置
-            //               Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].Y); //Y位置
             lcd.setCursor(8,  //X位置
                           1); //Y位置
 
@@ -443,23 +483,28 @@ void TaskDisplay(void *pvParameters)
             snprintf_P(datestring2,
                        countof(datestring2),
                        PSTR("%02u:%02u %02u"),
-                       alarm[lDisplayIndex.page - 1].Hour(),
-                       alarm[lDisplayIndex.page - 1].Minute(),
-                       alarm[lDisplayIndex.page - 1].Second());
+                       Page[lDisplayIndex.page].UI_data[0].data,
+                       Page[lDisplayIndex.page].UI_data[1].data,
+                       Page[lDisplayIndex.page].UI_data[2].data);
 
             lcd.print(datestring2); //显示数据
+
+            //*显示光标
+            lcd.setCursor(Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].X,  //X位置
+                          Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].Y); //Y位置
+
+            lcd.cursor();
+
+            // Serial.print("page:");
+            // Serial.print(lDisplayIndex.page);
+            // Serial.print("  index:");
+            // Serial.println(lDisplayIndex.index);
         }
-
-        //*显示光标
-        lcd.setCursor(Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].X,  //X位置
-                      Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].Y); //Y位置
-
-        lcd.cursor();
-
-        Serial.print("page:");
-        Serial.print(lDisplayIndex.page);
-        Serial.print("  index:");
-        Serial.println(lDisplayIndex.index);
+        else
+        {
+            //隐藏光标
+            lcd.noCursor();
+        }
 
         //退出临界区
         taskEXIT_CRITICAL();
@@ -496,8 +541,3 @@ void BUZZER_SetLow()
 {
     digitalWrite(BUZZER_N_PIN, HIGH);
 }
-
-/**
- * @brief 
- * 
- */

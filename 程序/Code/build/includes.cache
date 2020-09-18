@@ -21,6 +21,11 @@
   },
   {
     "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\Code.ino.cpp",
+    "Include": "EEPROM.h",
+    "Includepath": "D:\\Arduino\\hardware\\arduino\\avr\\libraries\\EEPROM\\src"
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\Code.ino.cpp",
     "Include": "",
     "Includepath": null
   },
