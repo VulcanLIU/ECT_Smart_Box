@@ -139,7 +139,7 @@ RtcDateTime alarm[4];
 void TaskKeyboardRead(void *pvParameters); //键盘读取任务
 void TaskMainLogic(void *pvParameters);    //主逻辑任务
 void TaskDisplay(void *pvParameters);      //1602显示器显示任务
-void TaskAlarm(void *pvParameters);        //报警
+void TaskAlarm(uint8_t *pvParameters);     //报警
 
 void setup()
 {
@@ -393,7 +393,7 @@ void TaskMainLogic(void *pvParameters)
                 {
                     //创建任务
                     xTaskCreate(TaskAlarm,
-                                "TaskAlarm",
+                                "TaskAlarm1",
                                 1000,
                                 STEPPER_PIN_ARRY[0],
                                 2,
@@ -408,12 +408,64 @@ void TaskMainLogic(void *pvParameters)
                 break;
             case '5': //药仓2定时按钮
                 Alarm2_LED.update();
+
+                //创建定时任务
+                if (Alarm2_LED.state())
+                {
+                    //创建任务
+                    xTaskCreate(TaskAlarm,
+                                "TaskAlarm2",
+                                1000,
+                                STEPPER_PIN_ARRY[1],
+                                2,
+                                &xTaskAlarm2Handle);
+                }
+                else
+                {
+                    //删除任务
+                    vTaskDelete(xTaskAlarm2Handle);
+                }
+
                 break;
             case '6': //药仓3定时按钮
                 Alarm3_LED.update();
+
+                //创建定时任务
+                if (Alarm3_LED.state())
+                {
+                    //创建任务
+                    xTaskCreate(TaskAlarm,
+                                "TaskAlarm3",
+                                1000,
+                                STEPPER_PIN_ARRY[2],
+                                2,
+                                &xTaskAlarm3Handle);
+                }
+                else
+                {
+                    //删除任务
+                    vTaskDelete(xTaskAlarm3Handle);
+                }
                 break;
             case '7': //药仓4定时按钮
                 Alarm4_LED.update();
+
+                //创建定时任务
+                if (Alarm4_LED.state())
+                {
+                    //创建任务
+                    xTaskCreate(TaskAlarm,
+                                "TaskAlarm4",
+                                1000,
+                                STEPPER_PIN_ARRY[4],
+                                2,
+                                &xTaskAlarm4Handle);
+                }
+                else
+                {
+                    //删除任务
+                    vTaskDelete(xTaskAlarm4Handle);
+                }
                 break;
             default:
                 break;
@@ -493,7 +545,7 @@ void TaskDisplay(void *pvParameters)
                    now.Minute(),
                    now.Second());
 
-        //Serial.println(datestring);
+        Serial.println(datestring);
 
         //lcd清屏
         lcd.clear();
@@ -554,18 +606,14 @@ void TaskDisplay(void *pvParameters)
 
 void TaskAlarm(uint8_t *pvParameters)
 {
-    const uint8_t STEPS = 100;
+    const uint16_t STEPS = 100;
 
-    Serial.print("A:");
-    Serial.println(pvParameters[0]); //
-
-    Stepper stepper(STEPS, 50, 51, 52, 53);
-
-    stepper.setSpeed(90);
+    Stepper myStepper(STEPS, pvParameters[0], pvParameters[1], pvParameters[2], pvParameters[3]);
+    myStepper.setSpeed(200);
 
     while (1)
     {
-        stepper.step(2048);
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        myStepper.step(STEPS);
+        vTaskDelay(pdMS_TO_TICKS(2000));
     }
 }
