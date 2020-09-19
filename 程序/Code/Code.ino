@@ -5,6 +5,9 @@
 #include "ThreeWire.h"
 #include "RtcDS1302.h"
 #include <EEPROM.h>
+#include "LED.h"
+#include "Buzzer.h"
+#include "Stepper.h"
 
 #define KEY_COLUMN_NUM 4
 #define KEY_ROW_NUM 4
@@ -18,16 +21,12 @@
 #define KEY_COLUMN2_PIN A1
 #define KEY_COLUMN3_PIN A0
 
-#define BUZZER_P_PIN 22
-#define BUZZER_N_PIN 26
-
-#define ALARM1_LED_P_PIN 34
-#define ALARM1_LED_N_PIN 35
-#define ALARM2_LED_P_PIN 38
-
 #define PAGE_DATA_NUM 3                        //每页数据量
 #define PAGE_NUM 5                             //页面总数
 #define DATA_TOTAL_NUM PAGE_DATA_NUM *PAGE_NUM //需要保存的数据总量
+
+#define STEPPER_NUM 4 //
+#define STEPPER_PIN_NUM 4
 
 #define countof(a) (sizeof(a) / sizeof(a[0]))
 
@@ -42,12 +41,25 @@ char KEY_VALUE_ARRY[KEY_ROW_NUM][KEY_COLUMN_NUM] = {
     {'8', '9', 'A', 'B'},
     {'C', 'D', 'E', 'F'}};
 
+//步进电机引脚数组
+uint8_t STEPPER_PIN_ARRY[STEPPER_NUM][STEPPER_PIN_NUM] = {
+    {50, 51, 52, 53},
+    {46, 47, 48, 49},
+    {42, 43, 44, 45},
+    {38, 39, 40, 41}};
+
 //队列
 QueueHandle_t xKeyPadQueue;       //键盘的消息队列
 QueueHandle_t xDisplayIndexQueue; //用于显示器显示内容的指针队列
 
 //信号量
 SemaphoreHandle_t xSerialSemaphore;
+
+//定时器任务句柄
+TaskHandle_t xTaskAlarm1Handle = NULL;
+TaskHandle_t xTaskAlarm2Handle = NULL;
+TaskHandle_t xTaskAlarm3Handle = NULL;
+TaskHandle_t xTaskAlarm4Handle = NULL;
 
 //初始化键盘
 Keypad customKeypad = Keypad(makeKeymap(KEY_VALUE_ARRY), KEY_ROW_PIN_ARRY, KEY_COLUMN_PIN_ARRY, KEY_ROW_NUM, KEY_COLUMN_NUM);
@@ -83,25 +95,25 @@ typedef struct PAGE
 
 PAGE Page[PAGE_NUM] = {
     {
-        {{0, 1, " "}, {8, 1, " "}},           // UI界面文字
-        {{0, 1, 12}, {5, 1, 12}, {10, 1, 14}} //
-    },
+        {{0, 1, " "}, {8, 1, " "}},        // UI界面文字
+        {{0, 0, 0}, {5, 0, 0}, {10, 0, 0}} //
+    },                                     //Page0;
     {
-        {{0, 1, "Alarm1"}, {8, 1, "B"}},       // UI界面文字
-        {{9, 1, 12}, {12, 1, 12}, {15, 1, 14}} //
-    },                                         //Page1;
+        {{0, 1, "Alarm1"}, {8, 1, "B"}},    // UI界面文字
+        {{9, 1, 0}, {12, 1, 0}, {15, 1, 0}} //小时/分钟/药量
+    },                                      //Page1;
     {
-        {{0, 1, "Alarm2"}, {8, 1, "D"}},       // UI界面文字
-        {{9, 1, 12}, {12, 1, 12}, {15, 1, 14}} //
-    },                                         //Page2;
+        {{0, 1, "Alarm2"}, {8, 1, "D"}},    // UI界面文字
+        {{9, 1, 0}, {12, 1, 0}, {15, 1, 0}} //小时/分钟/药量
+    },                                      //Page2;
     {
-        {{0, 1, "Alarm3"}, {8, 1, "B"}},       // UI界面文字
-        {{9, 1, 12}, {12, 1, 12}, {15, 1, 14}} //
-    },                                         //Page3;
+        {{0, 1, "Alarm3"}, {8, 1, "B"}},    // UI界面文字
+        {{9, 1, 0}, {12, 1, 0}, {15, 1, 0}} //小时/分钟/药量
+    },                                      //Page3;
     {
-        {{0, 1, "Alarm4"}, {8, 1, "B"}},       // UI界面文字
-        {{9, 1, 12}, {12, 1, 12}, {15, 1, 14}} //
-    }                                          //Page4;
+        {{0, 1, "Alarm4"}, {8, 1, "B"}},    // UI界面文字
+        {{9, 1, 0}, {12, 1, 0}, {15, 1, 0}} //小时/分钟/药量
+    }                                       //Page4;
 };
 
 typedef struct DISPLAYINDEX
@@ -146,6 +158,12 @@ void setup()
     //启动显示器
     lcd.begin(16, 2);
 
+    //启动四个指示灯
+    Alarm1_LED.init();
+    Alarm2_LED.init();
+    Alarm3_LED.init();
+    Alarm4_LED.init();
+
     //启动DS1302
     Rtc.Begin();
 
@@ -155,11 +173,12 @@ void setup()
     Serial.print("compiled: ");
     Serial.print(__DATE__);
     Serial.println(__TIME__);
+
     delay(500);
 
     //获取编译器时间并写入DS1302
-    RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
-    Rtc.SetDateTime(compiled);
+    // RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
+    // Rtc.SetDateTime(compiled);
 
     //创建按键队列-10个值,char类型变量
     xKeyPadQueue = xQueueCreate(10, sizeof(char));
@@ -366,8 +385,36 @@ void TaskMainLogic(void *pvParameters)
                         _temp += 99;
                     Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].data = _temp;
                 }
-            case '4':
+            case '4': //药仓1定时按钮
+                Alarm1_LED.update();
 
+                //创建定时任务
+                if (Alarm1_LED.state())
+                {
+                    //创建任务
+                    xTaskCreate(TaskAlarm,
+                                "TaskAlarm",
+                                1000,
+                                STEPPER_PIN_ARRY[0],
+                                2,
+                                &xTaskAlarm1Handle);
+                }
+                else
+                {
+                    //删除任务
+                    vTaskDelete(xTaskAlarm1Handle);
+                }
+
+                break;
+            case '5': //药仓2定时按钮
+                Alarm2_LED.update();
+                break;
+            case '6': //药仓3定时按钮
+                Alarm3_LED.update();
+                break;
+            case '7': //药仓4定时按钮
+                Alarm4_LED.update();
+                break;
             default:
                 break;
             }
@@ -505,31 +552,20 @@ void TaskDisplay(void *pvParameters)
     }
 }
 
-/**
- * @brief 蜂鸣器启动函数
- * 
- */
-void BUZZER_init()
+void TaskAlarm(uint8_t *pvParameters)
 {
-    pinMode(BUZZER_P_PIN, INPUT_PULLUP);
-    pinMode(BUZZER_N_PIN, OUTPUT);
-    digitalWrite(BUZZER_N_PIN, HIGH);
-}
+    const uint8_t STEPS = 100;
 
-/**
- * @brief 蜂鸣器响
- * 
- */
-void BUZZER_SetHigh()
-{
-    digitalWrite(BUZZER_N_PIN, LOW);
-}
+    Serial.print("A:");
+    Serial.println(pvParameters[0]); //
 
-/**
- * @brief 蜂鸣器不响
- * 
- */
-void BUZZER_SetLow()
-{
-    digitalWrite(BUZZER_N_PIN, HIGH);
+    Stepper stepper(STEPS, 50, 51, 52, 53);
+
+    stepper.setSpeed(90);
+
+    while (1)
+    {
+        stepper.step(2048);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
 }
