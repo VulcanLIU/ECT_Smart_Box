@@ -10,6 +10,7 @@
 #include "LED.h"
 #include "Buzzer.h"
 #include "Stepper.h"
+#include "Photogate.h"
 
 #define KEY_COLUMN_NUM 4
 #define KEY_ROW_NUM 4
@@ -62,6 +63,13 @@ TaskHandle_t xTaskAlarm1Handle = NULL;
 TaskHandle_t xTaskAlarm2Handle = NULL;
 TaskHandle_t xTaskAlarm3Handle = NULL;
 TaskHandle_t xTaskAlarm4Handle = NULL;
+
+//定时器任务句柄数组
+TaskHandle_t xTaskAlarmHandle[4] = {
+    xTaskAlarm1Handle,
+    xTaskAlarm2Handle,
+    xTaskAlarm3Handle,
+    xTaskAlarm4Handle};
 
 //初始化键盘
 Keypad customKeypad = Keypad(makeKeymap(KEY_VALUE_ARRY), KEY_ROW_PIN_ARRY, KEY_COLUMN_PIN_ARRY, KEY_ROW_NUM, KEY_COLUMN_NUM);
@@ -128,10 +136,10 @@ typedef struct DISPLAYINDEX
 };
 
 //给定时器给出数字标号
-const uint8_t Alarm1_index = 1;
-const uint8_t Alarm2_index = 2;
-const uint8_t Alarm3_index = 3;
-const uint8_t Alarm4_index = 4;
+int Alarm1_index = 1;
+int Alarm2_index = 2;
+int Alarm3_index = 3;
+int Alarm4_index = 4;
 
 //实例化 DS1302对象
 ThreeWire myWire(4, 5, 2); // IO, SCLK, CE
@@ -147,13 +155,13 @@ RtcDateTime alarm[4];
 void TaskKeyboardRead(void *pvParameters); //键盘读取任务
 void TaskMainLogic(void *pvParameters);    //主逻辑任务
 void TaskDisplay(void *pvParameters);      //1602显示器显示任务
-void TaskAlarm(uint8_t *pvParameters);     //报警
+void TaskAlarm(void *pvParameters);        //报警
 
-#line 150 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 158 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void setup();
-#line 223 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 235 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void loop();
-#line 150 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 158 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void setup()
 {
     //打开串口
@@ -170,6 +178,7 @@ void setup()
 
     //启动显示器
     lcd.begin(16, 2);
+    lcd.clear();
 
     //启动四个指示灯
     Alarm1_LED.init();
@@ -182,6 +191,9 @@ void setup()
 
     //蜂鸣器启动
     BUZZER_init();
+
+    //启动光电门
+    Photogate_init();
 
     Serial.print("compiled: ");
     Serial.print(__DATE__);
@@ -371,8 +383,8 @@ void TaskMainLogic(void *pvParameters)
                 {
                     int8_t _temp = Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].data;
                     _temp++;
-                    if (_temp > 12 && lDisplayIndex.index == 0)
-                        _temp -= 12;
+                    if (_temp > 24 && lDisplayIndex.index == 0)
+                        _temp -= 24;
                     if (_temp > 60 && lDisplayIndex.index == 1)
                         _temp -= 60;
                     if (_temp > 99 && lDisplayIndex.index == 2)
@@ -391,7 +403,7 @@ void TaskMainLogic(void *pvParameters)
                     int8_t _temp = Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].data;
                     _temp--;
                     if (_temp <= 0 && lDisplayIndex.index == 0)
-                        _temp += 12;
+                        _temp += 24;
                     if (_temp <= 0 && lDisplayIndex.index == 1)
                         _temp += 60;
                     if (_temp <= 0 && lDisplayIndex.index == 2)
@@ -410,7 +422,7 @@ void TaskMainLogic(void *pvParameters)
                     xTaskCreate(TaskAlarm,
                                 "TaskAlarm1",
                                 1000,
-                                &Alarm1_index,
+                                Alarm1_index,
                                 2,
                                 &xTaskAlarm1Handle);
                 }
@@ -431,7 +443,7 @@ void TaskMainLogic(void *pvParameters)
                     xTaskCreate(TaskAlarm,
                                 "TaskAlarm2",
                                 1000,
-                                &Alarm2_index,
+                                Alarm2_index,
                                 2,
                                 &xTaskAlarm2Handle);
                 }
@@ -452,7 +464,7 @@ void TaskMainLogic(void *pvParameters)
                     xTaskCreate(TaskAlarm,
                                 "TaskAlarm3",
                                 1000,
-                                &Alarm3_index,
+                                Alarm3_index,
                                 2,
                                 &xTaskAlarm3Handle);
                 }
@@ -472,7 +484,7 @@ void TaskMainLogic(void *pvParameters)
                     xTaskCreate(TaskAlarm,
                                 "TaskAlarm4",
                                 1000,
-                                &Alarm4_index,
+                                Alarm4_index,
                                 2,
                                 &xTaskAlarm4Handle);
                 }
@@ -560,7 +572,7 @@ void TaskDisplay(void *pvParameters)
                    now.Minute(),
                    now.Second());
 
-        Serial.println(datestring);
+        // Serial.println(datestring);
 
         //lcd清屏
         lcd.clear();
@@ -619,9 +631,10 @@ void TaskDisplay(void *pvParameters)
     }
 }
 
-void TaskAlarm(uint8_t *pvParameters)
+void TaskAlarm(void *pvParameters)
 {
-    uint8_t Alarm_index = &pvParameters;
+    uint8_t _day = 0;
+    int Alarm_index = (int *)pvParameters;
     //初始化步进电机
     const uint16_t STEPS = 100;
     Stepper myStepper(STEPS,
@@ -640,8 +653,14 @@ void TaskAlarm(uint8_t *pvParameters)
                                          Page[Alarm_index].UI_data[0].data,
                                          Page[Alarm_index].UI_data[1].data,
                                          0);
-    
-    Serial.print("PIN:    ");
+
+    Pill_left[Alarm_index - 1] = Page[Alarm_index].UI_data[2].data;
+
+    //DEBUG调试数据输出区
+    Serial.print("Alarm_index:    ");
+    Serial.print(Alarm_index);
+
+    Serial.print("  PIN:    ");
     Serial.print(STEPPER_PIN_ARRY[Alarm_index - 1][0]);
 
     Serial.print("  Alarm Hour:    ");
@@ -652,26 +671,48 @@ void TaskAlarm(uint8_t *pvParameters)
 
     while (1)
     {
-
         //判断定时
-        if (alarm_time.Hour() == now.Hour() && alarm_time.Minute() == now.Minute())
+        if (alarm_time.Hour() == now.Hour() && alarm_time.Minute() == now.Minute() && _day != now.Day()) //alarm_time.Hour() == now.Hour() && alarm_time.Minute() == now.Minute()
         {
-            ////myStepper.step(STEPS);
-            BUZZER_SetHigh();
-            vTaskDelay(pdMS_TO_TICKS(90));
-            BUZZER_SetLow();
-            vTaskDelay(pdMS_TO_TICKS(90));
+            //保存最后提醒时间
+            _day = now.Day();
 
-            BUZZER_SetHigh();
-            vTaskDelay(pdMS_TO_TICKS(90));
-            BUZZER_SetLow();
-            vTaskDelay(pdMS_TO_TICKS(90));
+            //光电门中断
+            attachInterrupt(digitalPinToInterrupt(Photogate_PIN_ARRY[Alarm_index - 1]),
+                            Photogate_ISR[Alarm_index - 1],
+                            RISING);
 
-            BUZZER_SetHigh();
-            vTaskDelay(pdMS_TO_TICKS(90));
-            BUZZER_SetLow();
-            vTaskDelay(pdMS_TO_TICKS(90));
+            //先出药
+            while (Pill_left[Alarm_index - 1] > 0)
+            {
+                Serial.print("Pill_left:    ");
+                Serial.println(Pill_left[Alarm_index - 1]);
+                myStepper.step(STEPS);
+            }
+
+            //再响铃
+            for (uint8_t i = 0; i < 10; i++)
+            {
+                //
+                BUZZER_SetHigh();
+                vTaskDelay(pdMS_TO_TICKS(90));
+                BUZZER_SetLow();
+                vTaskDelay(pdMS_TO_TICKS(90));
+
+                //
+                BUZZER_SetHigh();
+                vTaskDelay(pdMS_TO_TICKS(90));
+                BUZZER_SetLow();
+                vTaskDelay(pdMS_TO_TICKS(600));
+            }
+
+            //取消中断
+            detachInterrupt(digitalPinToInterrupt(Photogate_PIN_ARRY[Alarm_index - 1]));
+
+            //还原药量
+            Pill_left[Alarm_index - 1] = Page[Alarm_index].UI_data[2].data;
         }
         vTaskDelay(pdMS_TO_TICKS(2000));
     }
 }
+

@@ -1,13 +1,13 @@
 #include "Arduino.h"
 
-#define ALARM1_LED_P_PIN 20
-#define ALARM1_LED_N_PIN 21
-#define ALARM2_LED_P_PIN 18
-#define ALARM2_LED_N_PIN 19
-#define ALARM3_LED_P_PIN 16
-#define ALARM3_LED_N_PIN 17
-#define ALARM4_LED_P_PIN 14
-#define ALARM4_LED_N_PIN 15
+#define ALARM1_LED_P_PIN A14
+#define ALARM1_LED_N_PIN A15
+#define ALARM2_LED_P_PIN A12
+#define ALARM2_LED_N_PIN A13
+#define ALARM3_LED_P_PIN A10
+#define ALARM3_LED_N_PIN A11
+#define ALARM4_LED_P_PIN A8
+#define ALARM4_LED_N_PIN A9
 
 class LED
 {
