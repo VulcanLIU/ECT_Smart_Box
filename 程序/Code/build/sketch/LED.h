@@ -9,6 +9,13 @@
 #define ALARM4_LED_P_PIN A8
 #define ALARM4_LED_N_PIN A9
 
+extern uint8_t l_y;
+extern uint8_t l_m;
+extern uint8_t l_d;
+extern uint8_t l_h;
+extern uint8_t l_mi;
+extern uint8_t l_s;
+
 class LED
 {
 private:

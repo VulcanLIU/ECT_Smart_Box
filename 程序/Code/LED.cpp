@@ -1,5 +1,12 @@
 #include "LED.h"
 
+uint8_t l_y = 2020;
+uint8_t l_m = 10;
+uint8_t l_d = 4;
+uint8_t l_h = 12;
+uint8_t l_mi = 0;
+uint8_t l_s = 0;
+
 void LED::init()
 {
     pinMode(_P_pin, OUTPUT);

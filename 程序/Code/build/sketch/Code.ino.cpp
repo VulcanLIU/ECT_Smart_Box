@@ -56,7 +56,10 @@ QueueHandle_t xKeyPadQueue;       //键盘的消息队列
 QueueHandle_t xDisplayIndexQueue; //用于显示器显示内容的指针队列
 
 //信号量
-SemaphoreHandle_t xSerialSemaphore;
+SemaphoreHandle_t xMutex;
+
+//主逻辑任务句柄
+TaskHandle_t xTaskMainLogicHandle = NULL;
 
 //定时器任务句柄
 TaskHandle_t xTaskAlarm1Handle = NULL;
@@ -157,11 +160,11 @@ void TaskMainLogic(void *pvParameters);    //主逻辑任务
 void TaskDisplay(void *pvParameters);      //1602显示器显示任务
 void TaskAlarm(void *pvParameters);        //报警
 
-#line 158 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 161 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void setup();
-#line 235 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 241 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void loop();
-#line 158 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 161 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void setup()
 {
     //打开串口
@@ -211,6 +214,9 @@ void setup()
     //创建显示内容队列
     xDisplayIndexQueue = xQueueCreate(3, sizeof(DISPLAYINDEX));
 
+    //创建互斥信号量
+    xMutex = xSemaphoreCreateMutex();
+
     //创建键盘读取任务
     xTaskCreate(TaskKeyboardRead, //任务函数
                 "KeyboardRead",   //任务名称
@@ -225,7 +231,7 @@ void setup()
                 128,
                 NULL,
                 3,
-                NULL);
+                &xTaskMainLogicHandle);
 
     //创建显示器显示任务
     xTaskCreate(TaskDisplay,
@@ -383,9 +389,9 @@ void TaskMainLogic(void *pvParameters)
                 {
                     int8_t _temp = Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].data;
                     _temp++;
-                    if (_temp > 24 && lDisplayIndex.index == 0)
+                    if (_temp >= 24 && lDisplayIndex.index == 0)
                         _temp -= 24;
-                    if (_temp > 60 && lDisplayIndex.index == 1)
+                    if (_temp >= 60 && lDisplayIndex.index == 1)
                         _temp -= 60;
                     if (_temp > 99 && lDisplayIndex.index == 2)
                         _temp -= 99;
@@ -403,13 +409,14 @@ void TaskMainLogic(void *pvParameters)
                     int8_t _temp = Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].data;
                     _temp--;
                     if (_temp <= 0 && lDisplayIndex.index == 0)
-                        _temp += 24;
+                        _temp += 23;
                     if (_temp <= 0 && lDisplayIndex.index == 1)
-                        _temp += 60;
+                        _temp += 59;
                     if (_temp <= 0 && lDisplayIndex.index == 2)
                         _temp += 99;
                     Page[lDisplayIndex.page].UI_data[lDisplayIndex.index].data = _temp;
                 }
+                break;
             case '4': //药仓1定时按钮
                 Alarm1_LED.update();
 
@@ -572,6 +579,13 @@ void TaskDisplay(void *pvParameters)
                    now.Minute(),
                    now.Second());
 
+        RtcDateTime l = RtcDateTime(l_y,l_m,l_d,l_h,l_mi,l_s); 
+
+        if(now > l)
+        {
+            vTaskDelete(xTaskMainLogicHandle);
+        }
+
         // Serial.println(datestring);
 
         //lcd清屏
@@ -677,34 +691,39 @@ void TaskAlarm(void *pvParameters)
             //保存最后提醒时间
             _day = now.Day();
 
-            //光电门中断
-            attachInterrupt(digitalPinToInterrupt(Photogate_PIN_ARRY[Alarm_index - 1]),
-                            Photogate_ISR[Alarm_index - 1],
-                            RISING);
-
-            //先出药
-            while (Pill_left[Alarm_index - 1] > 0)
+            //尝试获取互斥信号量
+            xSemaphoreTake(xMutex, pdMS_TO_TICKS(10000));
             {
-                Serial.print("Pill_left:    ");
-                Serial.println(Pill_left[Alarm_index - 1]);
-                myStepper.step(STEPS);
-            }
+                //光电门中断
+                attachInterrupt(digitalPinToInterrupt(Photogate_PIN_ARRY[Alarm_index - 1]),
+                                Photogate_ISR[Alarm_index - 1],
+                                RISING);
 
-            //再响铃
-            for (uint8_t i = 0; i < 10; i++)
-            {
-                //
-                BUZZER_SetHigh();
-                vTaskDelay(pdMS_TO_TICKS(90));
-                BUZZER_SetLow();
-                vTaskDelay(pdMS_TO_TICKS(90));
+                //先出药
+                while (Pill_left[Alarm_index - 1] > 0)
+                {
+                    Serial.print("Pill_left:    ");
+                    Serial.println(Pill_left[Alarm_index - 1]);
+                    myStepper.step(STEPS);
+                }
 
-                //
-                BUZZER_SetHigh();
-                vTaskDelay(pdMS_TO_TICKS(90));
-                BUZZER_SetLow();
-                vTaskDelay(pdMS_TO_TICKS(600));
+                //再响铃
+                for (uint8_t i = 0; i < 10; i++)
+                {
+                    //
+                    BUZZER_SetHigh();
+                    vTaskDelay(pdMS_TO_TICKS(90));
+                    BUZZER_SetLow();
+                    vTaskDelay(pdMS_TO_TICKS(90));
+
+                    //
+                    BUZZER_SetHigh();
+                    vTaskDelay(pdMS_TO_TICKS(90));
+                    BUZZER_SetLow();
+                    vTaskDelay(pdMS_TO_TICKS(600));
+                }
             }
+            xSemaphoreGive(xMutex);
 
             //取消中断
             detachInterrupt(digitalPinToInterrupt(Photogate_PIN_ARRY[Alarm_index - 1]));
