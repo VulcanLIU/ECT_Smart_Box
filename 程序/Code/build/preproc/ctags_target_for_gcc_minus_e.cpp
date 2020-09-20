@@ -121,6 +121,12 @@ typedef struct DISPLAYINDEX
     bool index_visiable; //光标是否显示
 };
 
+//给定时器给出数字标号
+const uint8_t Alarm1_index = 1;
+const uint8_t Alarm2_index = 2;
+const uint8_t Alarm3_index = 3;
+const uint8_t Alarm4_index = 4;
+
 //实例化 DS1302对象
 ThreeWire myWire(4, 5, 2); // IO, SCLK, CE
 RtcDS1302<ThreeWire> Rtc(myWire);
@@ -167,8 +173,8 @@ void setup()
     BUZZER_init();
 
     Serial.print("compiled: ");
-    Serial.print("Sep 19 2020");
-    Serial.println("23:38:45");
+    Serial.print("Sep 20 2020");
+    Serial.println("12:57:53");
 
     delay(500);
 
@@ -187,15 +193,15 @@ void setup()
                 "KeyboardRead", //任务名称
                 128, //堆栈深度
                 
-# 193 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3 4
+# 199 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3 4
                __null
-# 193 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 199 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                    , //
                 4, //优先级
                 
-# 195 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3 4
+# 201 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3 4
                __null
-# 195 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 201 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                    ); //传入参数
 
     //创建主逻辑任务
@@ -203,15 +209,15 @@ void setup()
                 "MainLogic",
                 128,
                 
-# 201 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3 4
+# 207 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3 4
                __null
-# 201 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 207 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                    ,
                 3,
                 
-# 203 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3 4
+# 209 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3 4
                __null
-# 203 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 209 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                    );
 
     //创建显示器显示任务
@@ -219,15 +225,15 @@ void setup()
                 "Display",
                 128,
                 
-# 209 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3 4
+# 215 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3 4
                __null
-# 209 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 215 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                    ,
                 5,
                 
-# 211 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3 4
+# 217 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3 4
                __null
-# 211 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 217 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                    );
 
     //启动调度器
@@ -252,7 +258,7 @@ void loop()
  * @param pvParameters 
 
  */
-# 232 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 238 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void TaskKeyboardRead(void *pvParameters)
 {
     //标识队列发送状态
@@ -267,9 +273,9 @@ void TaskKeyboardRead(void *pvParameters)
         if (customKey)
         {
             xStatus = xQueueGenericSend( ( xKeyPadQueue ), ( &customKey ), ( ( ( TickType_t ) ( ( ( uint32_t ) ( 30 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
-# 245 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 251 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                      0 
-# 245 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 251 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                      /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ) ), ( ( BaseType_t ) 0 ) );
 
             Serial.println(customKey);
@@ -283,9 +289,9 @@ void TaskKeyboardRead(void *pvParameters)
 
         //任务延时
         vTaskDelay(( ( TickType_t ) ( ( ( uint32_t ) ( 30 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
-# 257 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 263 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                   0 
-# 257 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 263 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                   /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
     }
 }
@@ -299,7 +305,7 @@ void TaskKeyboardRead(void *pvParameters)
  * @param pvParameters 
 
  */
-# 266 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 272 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void TaskMainLogic(void *pvParameters)
 {
     //读取的按键值
@@ -316,9 +322,9 @@ void TaskMainLogic(void *pvParameters)
         //读取按键
         //*按键内容送入队列
         xStatus = xQueueReceive(xKeyPadQueue, lReceivedValue, ( ( TickType_t ) ( ( ( uint32_t ) ( 30 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
-# 281 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 287 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                                                              0 
-# 281 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 287 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                                                              /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
 
         if (xStatus == ( ( ( BaseType_t ) 1 ) ))
@@ -328,9 +334,9 @@ void TaskMainLogic(void *pvParameters)
             BUZZER_SetHigh();
 
             vTaskDelay(( ( TickType_t ) ( ( ( uint32_t ) ( 30 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
-# 289 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 295 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                       0 
-# 289 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 295 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                       /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
 
             BUZZER_SetLow();
@@ -436,11 +442,13 @@ void TaskMainLogic(void *pvParameters)
                 //创建定时任务
                 if (Alarm1_LED.state())
                 {
+                    //
+
                     //创建任务
                     xTaskCreate(TaskAlarm,
                                 "TaskAlarm1",
                                 1000,
-                                STEPPER_PIN_ARRY[0],
+                                &Alarm1_index,
                                 2,
                                 &xTaskAlarm1Handle);
                 }
@@ -461,7 +469,7 @@ void TaskMainLogic(void *pvParameters)
                     xTaskCreate(TaskAlarm,
                                 "TaskAlarm2",
                                 1000,
-                                STEPPER_PIN_ARRY[1],
+                                &Alarm2_index,
                                 2,
                                 &xTaskAlarm2Handle);
                 }
@@ -482,7 +490,7 @@ void TaskMainLogic(void *pvParameters)
                     xTaskCreate(TaskAlarm,
                                 "TaskAlarm3",
                                 1000,
-                                STEPPER_PIN_ARRY[2],
+                                &Alarm3_index,
                                 2,
                                 &xTaskAlarm3Handle);
                 }
@@ -502,7 +510,7 @@ void TaskMainLogic(void *pvParameters)
                     xTaskCreate(TaskAlarm,
                                 "TaskAlarm4",
                                 1000,
-                                STEPPER_PIN_ARRY[4],
+                                &Alarm4_index,
                                 2,
                                 &xTaskAlarm4Handle);
                 }
@@ -518,9 +526,9 @@ void TaskMainLogic(void *pvParameters)
         }
         //*显示内容放入队列
         xStatus = xQueueGenericSend( ( xDisplayIndexQueue ), ( &lDisplayIndex ), ( ( ( TickType_t ) ( ( ( uint32_t ) ( 30 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
-# 475 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 483 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                  0 
-# 475 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 483 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                  /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ) ), ( ( BaseType_t ) 0 ) );
 
         if (xStatus == ( ( ( BaseType_t ) 1 ) ))
@@ -534,16 +542,16 @@ void TaskMainLogic(void *pvParameters)
 
             //读取头部数据
             xQueueReceive(xDisplayIndexQueue, &lDisplayIndex_, ( ( TickType_t ) ( ( ( uint32_t ) ( 30 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
-# 487 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 495 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                                                               0 
-# 487 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 495 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                                                               /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
 
             //再次尝试把数据放入队列
             xStatus = xQueueGenericSend( ( xDisplayIndexQueue ), ( &lDisplayIndex ), ( ( ( TickType_t ) ( ( ( uint32_t ) ( 30 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
-# 490 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 498 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                      0 
-# 490 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 498 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                      /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ) ), ( ( BaseType_t ) 0 ) );
 
             if (xStatus == ( ( ( BaseType_t ) 1 ) ))
@@ -559,9 +567,9 @@ void TaskMainLogic(void *pvParameters)
 
     //任务延时
     vTaskDelay(( ( TickType_t ) ( ( ( uint32_t ) ( 30 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
-# 504 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 512 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
               0 
-# 504 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 512 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
               /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
 }
 
@@ -574,7 +582,7 @@ void TaskMainLogic(void *pvParameters)
  * @param pvParameters 
 
  */
-# 512 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 520 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void TaskDisplay(void *pvParameters)
 {
     //标识队列读取状态
@@ -587,9 +595,9 @@ void TaskDisplay(void *pvParameters)
     {
         //接收显示队列数据
         xStatus = xQueueReceive(xDisplayIndexQueue, &lDisplayIndex, ( ( TickType_t ) ( ( ( uint32_t ) ( 30 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
-# 523 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 531 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                                                                    0 
-# 523 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 531 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                                                                    /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
         if (xStatus == ( ( ( BaseType_t ) 1 ) ))
         {
@@ -609,13 +617,13 @@ void TaskDisplay(void *pvParameters)
         snprintf_P(datestring,
                    (sizeof(datestring) / sizeof(datestring[0])),
                    
-# 541 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 549 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                   (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 541 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 549 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                   "%02u/%02u %02u:%02u:%02u"
-# 541 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 549 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                   ); &__c[0];}))
-# 541 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 549 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                                                   ,
                    now.Month(),
                    now.Day(),
@@ -652,13 +660,13 @@ void TaskDisplay(void *pvParameters)
             snprintf_P(datestring2,
                        (sizeof(datestring2) / sizeof(datestring2[0])),
                        
-# 576 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 584 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                       (__extension__({static const char __c[] __attribute__((__progmem__)) = (
-# 576 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 584 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                       "%02u:%02u %02u"
-# 576 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 584 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                       ); &__c[0];}))
-# 576 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 584 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                                             ,
                        Page[lDisplayIndex.page].UI_data[0].data,
                        Page[lDisplayIndex.page].UI_data[1].data,
@@ -687,27 +695,94 @@ void TaskDisplay(void *pvParameters)
         __asm__ __volatile__ ( "pop __tmp_reg__" "\n\t" "out __SREG__, __tmp_reg__" "\n\t" ::: "memory" );
 
         vTaskDelay(( ( TickType_t ) ( ( ( uint32_t ) ( 300 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
-# 603 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 611 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                   0 
-# 603 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 611 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                   /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
     }
 }
 
 void TaskAlarm(uint8_t *pvParameters)
 {
+    uint8_t Alarm_index = &pvParameters;
+    //初始化步进电机
     const uint16_t STEPS = 100;
+    Stepper myStepper(STEPS,
+                      STEPPER_PIN_ARRY[Alarm_index - 1][0],
+                      STEPPER_PIN_ARRY[Alarm_index - 1][1],
+                      STEPPER_PIN_ARRY[Alarm_index - 1][2],
+                      STEPPER_PIN_ARRY[Alarm_index - 1][3]);
 
-    Stepper myStepper(STEPS, pvParameters[0], pvParameters[1], pvParameters[2], pvParameters[3]);
+    //*设置步进电机速度
     myStepper.setSpeed(200);
+
+    //记录定时时间-初始化为RtcDataTime对象
+    RtcDateTime alarm_time = RtcDateTime(now.Year(),
+                                         now.Month(),
+                                         now.Day(),
+                                         Page[Alarm_index].UI_data[0].data,
+                                         Page[Alarm_index].UI_data[1].data,
+                                         0);
+
+    Serial.print("PIN:    ");
+    Serial.print(STEPPER_PIN_ARRY[Alarm_index - 1][0]);
+
+    Serial.print("  Alarm Hour:    ");
+    Serial.print(alarm_time.Hour());
+
+    Serial.print("  Alarm Minute:    ");
+    Serial.println(alarm_time.Minute());
 
     while (1)
     {
-        myStepper.step(STEPS);
+
+        //判断定时
+        if (alarm_time.Hour() == now.Hour() && alarm_time.Minute() == now.Minute())
+        {
+            ////myStepper.step(STEPS);
+            BUZZER_SetHigh();
+            vTaskDelay(( ( TickType_t ) ( ( ( uint32_t ) ( 90 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
+# 654 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+                      0 
+# 654 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+                      /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
+            BUZZER_SetLow();
+            vTaskDelay(( ( TickType_t ) ( ( ( uint32_t ) ( 90 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
+# 656 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+                      0 
+# 656 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+                      /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
+
+            BUZZER_SetHigh();
+            vTaskDelay(( ( TickType_t ) ( ( ( uint32_t ) ( 90 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
+# 659 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+                      0 
+# 659 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+                      /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
+            BUZZER_SetLow();
+            vTaskDelay(( ( TickType_t ) ( ( ( uint32_t ) ( 90 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
+# 661 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+                      0 
+# 661 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+                      /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
+
+            BUZZER_SetHigh();
+            vTaskDelay(( ( TickType_t ) ( ( ( uint32_t ) ( 90 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
+# 664 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+                      0 
+# 664 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+                      /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
+            BUZZER_SetLow();
+            vTaskDelay(( ( TickType_t ) ( ( ( uint32_t ) ( 90 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
+# 666 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+                      0 
+# 666 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+                      /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
+        }
         vTaskDelay(( ( TickType_t ) ( ( ( uint32_t ) ( 2000 ) * ( TickType_t ) ( (TickType_t)( (uint32_t)128000 >> (
-# 617 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
+# 668 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino" 3
                   0 
-# 617 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+# 668 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
                   /* portUSE_WDTO to use the Watchdog Timer for xTaskIncrementTick*/ + 11) ) ) /* 2^11 = 2048 WDT scaler for 128kHz Timer*/ ) / ( TickType_t ) 1000 ) ));
     }
 }

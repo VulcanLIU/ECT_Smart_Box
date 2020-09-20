@@ -127,6 +127,12 @@ typedef struct DISPLAYINDEX
     bool index_visiable;                              //光标是否显示
 };
 
+//给定时器给出数字标号
+const uint8_t Alarm1_index = 1;
+const uint8_t Alarm2_index = 2;
+const uint8_t Alarm3_index = 3;
+const uint8_t Alarm4_index = 4;
+
 //实例化 DS1302对象
 ThreeWire myWire(4, 5, 2); // IO, SCLK, CE
 RtcDS1302<ThreeWire> Rtc(myWire);
@@ -143,11 +149,11 @@ void TaskMainLogic(void *pvParameters);    //主逻辑任务
 void TaskDisplay(void *pvParameters);      //1602显示器显示任务
 void TaskAlarm(uint8_t *pvParameters);     //报警
 
-#line 144 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 150 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void setup();
-#line 217 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 223 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void loop();
-#line 144 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
+#line 150 "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\Code.ino"
 void setup()
 {
     //打开串口
@@ -398,11 +404,13 @@ void TaskMainLogic(void *pvParameters)
                 //创建定时任务
                 if (Alarm1_LED.state())
                 {
+                    //
+
                     //创建任务
                     xTaskCreate(TaskAlarm,
                                 "TaskAlarm1",
                                 1000,
-                                STEPPER_PIN_ARRY[0],
+                                &Alarm1_index,
                                 2,
                                 &xTaskAlarm1Handle);
                 }
@@ -423,7 +431,7 @@ void TaskMainLogic(void *pvParameters)
                     xTaskCreate(TaskAlarm,
                                 "TaskAlarm2",
                                 1000,
-                                STEPPER_PIN_ARRY[1],
+                                &Alarm2_index,
                                 2,
                                 &xTaskAlarm2Handle);
                 }
@@ -444,7 +452,7 @@ void TaskMainLogic(void *pvParameters)
                     xTaskCreate(TaskAlarm,
                                 "TaskAlarm3",
                                 1000,
-                                STEPPER_PIN_ARRY[2],
+                                &Alarm3_index,
                                 2,
                                 &xTaskAlarm3Handle);
                 }
@@ -464,7 +472,7 @@ void TaskMainLogic(void *pvParameters)
                     xTaskCreate(TaskAlarm,
                                 "TaskAlarm4",
                                 1000,
-                                STEPPER_PIN_ARRY[4],
+                                &Alarm4_index,
                                 2,
                                 &xTaskAlarm4Handle);
                 }
@@ -613,14 +621,57 @@ void TaskDisplay(void *pvParameters)
 
 void TaskAlarm(uint8_t *pvParameters)
 {
+    uint8_t Alarm_index = &pvParameters;
+    //初始化步进电机
     const uint16_t STEPS = 100;
+    Stepper myStepper(STEPS,
+                      STEPPER_PIN_ARRY[Alarm_index - 1][0],
+                      STEPPER_PIN_ARRY[Alarm_index - 1][1],
+                      STEPPER_PIN_ARRY[Alarm_index - 1][2],
+                      STEPPER_PIN_ARRY[Alarm_index - 1][3]);
 
-    Stepper myStepper(STEPS, pvParameters[0], pvParameters[1], pvParameters[2], pvParameters[3]);
+    //*设置步进电机速度
     myStepper.setSpeed(200);
+
+    //记录定时时间-初始化为RtcDataTime对象
+    RtcDateTime alarm_time = RtcDateTime(now.Year(),
+                                         now.Month(),
+                                         now.Day(),
+                                         Page[Alarm_index].UI_data[0].data,
+                                         Page[Alarm_index].UI_data[1].data,
+                                         0);
+    
+    Serial.print("PIN:    ");
+    Serial.print(STEPPER_PIN_ARRY[Alarm_index - 1][0]);
+
+    Serial.print("  Alarm Hour:    ");
+    Serial.print(alarm_time.Hour());
+
+    Serial.print("  Alarm Minute:    ");
+    Serial.println(alarm_time.Minute());
 
     while (1)
     {
-        myStepper.step(STEPS);
+
+        //判断定时
+        if (alarm_time.Hour() == now.Hour() && alarm_time.Minute() == now.Minute())
+        {
+            ////myStepper.step(STEPS);
+            BUZZER_SetHigh();
+            vTaskDelay(pdMS_TO_TICKS(90));
+            BUZZER_SetLow();
+            vTaskDelay(pdMS_TO_TICKS(90));
+
+            BUZZER_SetHigh();
+            vTaskDelay(pdMS_TO_TICKS(90));
+            BUZZER_SetLow();
+            vTaskDelay(pdMS_TO_TICKS(90));
+
+            BUZZER_SetHigh();
+            vTaskDelay(pdMS_TO_TICKS(90));
+            BUZZER_SetLow();
+            vTaskDelay(pdMS_TO_TICKS(90));
+        }
         vTaskDelay(pdMS_TO_TICKS(2000));
     }
 }
