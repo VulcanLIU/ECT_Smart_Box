@@ -197,9 +197,27 @@ void setup()
 
     delay(500);
 
+    if (Rtc.GetIsWriteProtected())
+    {
+        Serial.println("RTC was write protected, enabling writing now");
+        Rtc.SetIsWriteProtected(false);
+    }
     //获取编译器时间并写入DS1302
-    // RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
-    // Rtc.SetDateTime(compiled);
+    RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
+    RtcDateTime now = Rtc.GetDateTime();
+    if (now < compiled) 
+    {
+        Serial.println("RTC is older than compile time!  (Updating DateTime)");
+        Rtc.SetDateTime(compiled);
+    }
+    else if (now > compiled) 
+    {
+        Serial.println("RTC is newer than compile time. (this is expected)");
+    }
+    else if (now == compiled) 
+    {
+        Serial.println("RTC is the same as compile time! (not expected but all is fine)");
+    }
 
     //创建按键队列-10个值,char类型变量
     xKeyPadQueue = xQueueCreate(10, sizeof(char));

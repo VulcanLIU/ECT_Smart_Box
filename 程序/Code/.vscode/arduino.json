@@ -3,5 +3,5 @@
     "configuration": "cpu=atmega2560",
     "sketch": "Code.ino",
     "output": ".\\build",
-    "port": "COM6"
+    "port": "COM7"
 }
