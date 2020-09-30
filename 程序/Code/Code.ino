@@ -590,12 +590,12 @@ void TaskDisplay(void *pvParameters)
                    now.Minute(),
                    now.Second());
 
-        RtcDateTime l = RtcDateTime(l_y,l_m,l_d,l_h,l_mi,l_s); 
+        // RtcDateTime l = RtcDateTime(l_y,l_m,l_d,l_h,l_mi,l_s); 
 
-        if(now > l)
-        {
-            vTaskDelete(xTaskMainLogicHandle);
-        }
+        // if(now > l)
+        // {
+        //     vTaskDelete(xTaskMainLogicHandle);
+        // }
 
         // Serial.println(datestring);
 
