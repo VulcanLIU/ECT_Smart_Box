@@ -26,11 +26,6 @@
   },
   {
     "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\Code.ino.cpp",
-    "Include": "Stepper.h",
-    "Includepath": "D:\\Arduino\\libraries\\Stepper\\src"
-  },
-  {
-    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\Code.ino.cpp",
     "Include": "",
     "Includepath": null
   },
@@ -56,6 +51,11 @@
   },
   {
     "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\RtcUtility.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "d:\\01-Projects\\接的项目\\药盒程序\\程序\\Code\\build\\sketch\\Stepper.cpp",
     "Include": "",
     "Includepath": null
   },
@@ -121,11 +121,6 @@
   },
   {
     "Sourcefile": "D:\\Arduino\\libraries\\LiquidCrystal\\src\\LiquidCrystal.cpp",
-    "Include": "",
-    "Includepath": null
-  },
-  {
-    "Sourcefile": "D:\\Arduino\\libraries\\Stepper\\src\\Stepper.cpp",
     "Include": "",
     "Includepath": null
   }

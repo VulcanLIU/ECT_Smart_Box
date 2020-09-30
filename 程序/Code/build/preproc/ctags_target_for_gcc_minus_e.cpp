@@ -192,8 +192,8 @@ void setup()
     Photogate_init();
 
     Serial.print("compiled: ");
-    Serial.print("Sep 21 2020");
-    Serial.println("14:03:01");
+    Serial.print("Sep 30 2020");
+    Serial.println("11:17:54");
 
     delay(500);
 
@@ -203,7 +203,7 @@ void setup()
         Rtc.SetIsWriteProtected(false);
     }
     //获取编译器时间并写入DS1302
-    RtcDateTime compiled = RtcDateTime("Sep 21 2020", "14:03:01");
+    RtcDateTime compiled = RtcDateTime("Sep 30 2020", "11:17:54");
     RtcDateTime now = Rtc.GetDateTime();
     if (now < compiled)
     {
@@ -668,12 +668,12 @@ void TaskDisplay(void *pvParameters)
                    now.Minute(),
                    now.Second());
 
-        RtcDateTime l = RtcDateTime(l_y,l_m,l_d,l_h,l_mi,l_s);
+        // RtcDateTime l = RtcDateTime(l_y,l_m,l_d,l_h,l_mi,l_s); 
 
-        if(now > l)
-        {
-            vTaskDelete(xTaskMainLogicHandle);
-        }
+        // if(now > l)
+        // {
+        //     vTaskDelete(xTaskMainLogicHandle);
+        // }
 
         // Serial.println(datestring);
 
